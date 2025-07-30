@@ -18,6 +18,7 @@ state = {
     "latest_data": "",
     "logs": [],
     "program_status": "🟢 運作中",
+    "check_interval": CHECK_INTERVAL,
     "total_checks": 0,
     "successful_checks": 0,
     "failed_checks": 0,
