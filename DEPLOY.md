@@ -29,7 +29,7 @@ git push -u origin main
    - **Name**: api-monitor-dashboard
    - **Environment**: Python
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python app.py`
+   - **Start Command**: `gunicorn app:app --bind 0.0.0.0:$PORT`
    - **Plan**: Free
 
 ### 4. 環境變數設定（可選）
