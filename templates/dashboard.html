@@ -47,7 +47,7 @@
             height: calc(100vh - 80px);
             padding: 20px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
         }
 
@@ -126,30 +126,83 @@
         }
 
         .api-status {
-            font-size: 1.2em;
+            font-size: 1.5em;
             font-weight: bold;
             text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
         }
 
         .api-success {
             background: rgba(0, 255, 136, 0.1);
             color: #00ff88;
-            border: 1px solid #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
 
         .api-error {
             background: rgba(255, 68, 68, 0.1);
             color: #ff4444;
-            border: 1px solid #ff4444;
+            border: 2px solid #ff4444;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
         }
 
         .api-waiting {
             background: rgba(255, 170, 0, 0.1);
             color: #ffaa00;
-            border: 1px solid #ffaa00;
+            border: 2px solid #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #cccccc;
+        }
+
+        .success-stat {
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .success-stat .stat-value {
+            color: #00ff88;
+        }
+
+        .error-stat {
+            border-color: rgba(255, 68, 68, 0.3);
+        }
+
+        .error-stat .stat-value {
+            color: #ff4444;
+        }
+
+        .info-stat {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .info-stat .stat-value {
+            color: #00d4ff;
         }
     </style>
 </head>
@@ -160,34 +213,6 @@
     </div>
 
     <div class="main-container">
-        <!-- 電腦狀態 -->
-        <div class="status-card">
-            <h3>
-                <span class="status-indicator status-success"></span>
-                💻 電腦狀態
-            </h3>
-            <div class="metric">
-                <span class="metric-label">RAM 使用率</span>
-                <span class="metric-value" id="ram-percent">{{ "%.1f"|format(state.ram_percent) if state.ram_percent > 0 else "0.0" }}%</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">RAM 使用量</span>
-                <span class="metric-value" id="ram-usage">{{ "%.0f"|format(state.ram_usage) if state.ram_usage > 0 else "0" }} MB</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">RAM 總量</span>
-                <span class="metric-value" id="ram-total">{{ "%.0f"|format(state.ram_total) if state.ram_total > 0 else "0" }} MB</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">CPU 使用率</span>
-                <span class="metric-value" id="cpu-percent">{{ "%.1f"|format(state.cpu_percent) if state.cpu_percent > 0 else "0.0" }}%</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">程式運行時間</span>
-                <span class="metric-value" id="uptime">{{ state.uptime }}</span>
-            </div>
-        </div>
-
         <!-- API狀態 -->
         <div class="status-card">
             <h3>
@@ -209,17 +234,73 @@
                 <span class="metric-label">檢查間隔</span>
                 <span class="metric-value">{{ state.check_interval // 60 }} 分鐘</span>
             </div>
+        </div>
+
+        <!-- 統計資料 -->
+        <div class="status-card">
+            <h3>
+                <span class="status-indicator status-success"></span>
+                📊 統計資料
+            </h3>
+            <div class="stats-grid">
+                <div class="stat-item info-stat">
+                    <div class="stat-value" id="total-checks">{{ state.total_checks }}</div>
+                    <div class="stat-label">總檢查次數</div>
+                </div>
+                <div class="stat-item success-stat">
+                    <div class="stat-value" id="successful-checks">{{ state.successful_checks }}</div>
+                    <div class="stat-label">成功次數</div>
+                </div>
+                <div class="stat-item error-stat">
+                    <div class="stat-value" id="failed-checks">{{ state.failed_checks }}</div>
+                    <div class="stat-label">失敗次數</div>
+                </div>
+                <div class="stat-item info-stat">
+                    <div class="stat-value" id="success-rate">
+                        {% if state.total_checks > 0 %}
+                            {{ "%.1f"|format(state.successful_checks / state.total_checks * 100) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                    <div class="stat-label">成功率</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系統資訊 -->
+        <div class="status-card">
+            <h3>
+                <span class="status-indicator status-warning"></span>
+                ⚙️ 系統資訊
+            </h3>
             <div class="metric">
-                <span class="metric-label">總檢查次數</span>
-                <span class="metric-value" id="total-checks">{{ state.total_checks }}</span>
+                <span class="metric-label">程式運行時間</span>
+                <span class="metric-value" id="uptime">{{ state.uptime }}</span>
             </div>
             <div class="metric">
-                <span class="metric-label">成功次數</span>
-                <span class="metric-value" id="successful-checks">{{ state.successful_checks }}</span>
+                <span class="metric-label">系統版本</span>
+                <span class="metric-value">{{ state.system_version }}</span>
             </div>
             <div class="metric">
-                <span class="metric-label">失敗次數</span>
-                <span class="metric-value" id="failed-checks">{{ state.failed_checks }}</span>
+                <span class="metric-label">最後成功時間</span>
+                <span class="metric-value" id="last-success-time">
+                    {% if state.last_success_time %}
+                        {{ state.last_success_time.split(' ')[1] if ' ' in state.last_success_time else state.last_success_time }}
+                    {% else %}
+                        尚未成功
+                    {% endif %}
+                </span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">最後失敗時間</span>
+                <span class="metric-value" id="last-failure-time">
+                    {% if state.last_failure_time %}
+                        {{ state.last_failure_time.split(' ')[1] if ' ' in state.last_failure_time else state.last_failure_time }}
+                    {% else %}
+                        無失敗記錄
+                    {% endif %}
+                </span>
             </div>
         </div>
     </div>
@@ -262,13 +343,6 @@
 
         // 更新頁面資料
         function updatePageData(data) {
-            // 更新電腦狀態
-            document.getElementById('ram-percent').textContent = (data.ram_percent || 0).toFixed(1) + '%';
-            document.getElementById('ram-usage').textContent = Math.round(data.ram_usage || 0) + ' MB';
-            document.getElementById('ram-total').textContent = Math.round(data.ram_total || 0) + ' MB';
-            document.getElementById('cpu-percent').textContent = (data.cpu_percent || 0).toFixed(1) + '%';
-            document.getElementById('uptime').textContent = data.uptime;
-            
             // 更新API狀態
             updateApiStatus(data.status);
             
@@ -278,9 +352,23 @@
             document.getElementById('last-check-time').textContent = lastCheckTime;
             document.getElementById('next-check-time').textContent = nextCheckTime;
             
+            // 更新統計資料
             document.getElementById('total-checks').textContent = data.total_checks;
             document.getElementById('successful-checks').textContent = data.successful_checks;
             document.getElementById('failed-checks').textContent = data.failed_checks;
+            
+            // 更新成功率
+            const successRate = data.total_checks > 0 ? (data.successful_checks / data.total_checks * 100).toFixed(1) : 0;
+            document.getElementById('success-rate').textContent = successRate + '%';
+            
+            // 更新系統資訊
+            document.getElementById('uptime').textContent = data.uptime;
+            
+            // 更新最後成功/失敗時間
+            const lastSuccessTime = data.last_success_time ? (data.last_success_time.split(' ')[1] || data.last_success_time) : '尚未成功';
+            const lastFailureTime = data.last_failure_time ? (data.last_failure_time.split(' ')[1] || data.last_failure_time) : '無失敗記錄';
+            document.getElementById('last-success-time').textContent = lastSuccessTime;
+            document.getElementById('last-failure-time').textContent = lastFailureTime;
         }
 
         // 初始化
