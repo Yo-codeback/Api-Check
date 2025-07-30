@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API 監控中心</title>
-<style>
+    <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
             color: #ffffff;
             overflow: hidden;
@@ -21,10 +21,9 @@
 
         .header {
             background: rgba(0, 0, 0, 0.8);
-            padding: 10px 20px;
+            padding: 15px 20px;
             border-bottom: 2px solid #00d4ff;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-            height: 60px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -32,38 +31,31 @@
 
         .header h1 {
             color: #00d4ff;
-            font-size: 1.8em;
+            font-size: 2em;
             text-shadow: 0 0 20px #00d4ff;
             font-weight: 300;
         }
 
         .time-display {
-            font-size: 1.2em;
+            font-size: 1.5em;
             color: #00d4ff;
             text-shadow: 0 0 10px #00d4ff;
             font-family: 'Courier New', monospace;
         }
 
         .main-container {
-            height: calc(100vh - 60px);
-            padding: 15px;
+            height: calc(100vh - 80px);
+            padding: 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto 1fr auto;
-            gap: 15px;
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 20px;
         }
 
         .status-card {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: 10px;
-            padding: 15px;
+            border-radius: 15px;
+            padding: 25px;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
@@ -76,17 +68,17 @@
 
         .status-card h3 {
             color: #00d4ff;
-            margin-bottom: 10px;
-            font-size: 1em;
+            margin-bottom: 20px;
+            font-size: 1.3em;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .status-indicator {
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -106,349 +98,133 @@
             box-shadow: 0 0 15px #ffaa00;
         }
 
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .metric-label {
+            color: #cccccc;
+            font-size: 1em;
+        }
+
+        .metric-value {
+            color: #ffffff;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
 
-        .metric {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 8px 0;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            font-size: 0.9em;
-        }
-
-        .metric-label {
-            color: #cccccc;
-        }
-
-        .metric-value {
-            color: #ffffff;
-    font-weight: bold;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff88, #00d4ff);
-            transition: width 0.3s ease;
-        }
-
-        .logs-container {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            backdrop-filter: blur(10px);
-            overflow-y: auto;
-            max-height: 200px;
-        }
-
-        .log-entry {
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-family: 'Courier New', monospace;
-            font-size: 0.8em;
-        }
-
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-
-        .log-success {
-            color: #00ff88;
-        }
-
-        .log-error {
-    color: #ff4444;
-        }
-
-        .log-warning {
-            color: #ffaa00;
-        }
-
-        .data-preview {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8em;
-            max-height: 120px;
-    overflow-y: auto;
-            color: #cccccc;
-        }
-
-        .health-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .health-card {
-            text-align: center;
-    padding: 10px;
-    border-radius: 8px;
-            border: 1px solid;
-        }
-
-        .health-success {
-            background: rgba(0, 255, 136, 0.1);
-            border-color: rgba(0, 255, 136, 0.3);
-        }
-
-        .health-info {
-            background: rgba(0, 212, 255, 0.1);
-            border-color: rgba(0, 212, 255, 0.3);
-        }
-
-        .health-warning {
-            background: rgba(255, 170, 0, 0.1);
-            border-color: rgba(255, 170, 0, 0.3);
-        }
-
-        .health-error {
-            background: rgba(255, 68, 68, 0.1);
-            border-color: rgba(255, 68, 68, 0.3);
-        }
-
-        .health-value {
-            font-size: 1.5em;
+        .api-status {
+            font-size: 1.2em;
             font-weight: bold;
-            margin-bottom: 4px;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
         }
 
-        .health-label {
-            font-size: 0.8em;
-            color: #cccccc;
+        .api-success {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border: 1px solid #00ff88;
         }
 
-        .success-value { color: #00ff88; }
-        .info-value { color: #00d4ff; }
-        .warning-value { color: #ffaa00; }
-        .error-value { color: #ff4444; }
+        .api-error {
+            background: rgba(255, 68, 68, 0.1);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+        }
 
-        @media (max-width: 1200px) {
-            .main-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto 1fr auto;
-            }
-            
-            .status-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .health-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-  }
-</style>
+        .api-waiting {
+            background: rgba(255, 170, 0, 0.1);
+            color: #ffaa00;
+            border: 1px solid #ffaa00;
+        }
+    </style>
 </head>
 <body>
     <div class="header">
         <h1>🚀 API 監控中心</h1>
-        <div class="time-display" id="current-time"></div>
+        <div class="time-display" id="current-time">載入中...</div>
     </div>
 
     <div class="main-container">
-        <!-- 狀態卡片區域 -->
-        <div class="status-grid">
-            <!-- 系統狀態 -->
-            <div class="status-card">
-                <h3>
-                    <span class="status-indicator" id="system-status-indicator"></span>
-                    系統狀態
-                </h3>
-                <div class="metric">
-                    <span class="metric-label">程式狀態</span>
-                    <span class="metric-value" id="program-status">{{ state.program_status }}</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">運行時間</span>
-                    <span class="metric-value" id="uptime">{{ state.uptime }}</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">API 狀態</span>
-                    <span class="metric-value" id="api-status">{{ state.status }}</span>
-                </div>
-            </div>
-
-            <!-- 抓取狀態 -->
-            <div class="status-card">
-                <h3>
-                    <span class="status-indicator" id="fetch-status-indicator"></span>
-                    抓取狀態
-                </h3>
-                <div class="metric">
-                    <span class="metric-label">上次抓取</span>
-                    <span class="metric-value" id="last-check-time">{{ state.last_check_time.split(' ')[1] if ' ' in state.last_check_time else state.last_check_time }}</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">下次抓取</span>
-                    <span class="metric-value" id="next-check-time">{{ state.next_check_time.split(' ')[1] if ' ' in state.next_check_time else state.next_check_time }}</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">間隔</span>
-                    <span class="metric-value">{{ state.check_interval // 60 }}分鐘</span>
-                </div>
-            </div>
-
-            <!-- 統計資料 -->
-            <div class="status-card">
-                <h3>
-                    <span class="status-indicator status-success"></span>
-                    統計資料
-                </h3>
-                <div class="metric">
-                    <span class="metric-label">總檢查</span>
-                    <span class="metric-value" id="total-checks">{{ state.total_checks }}</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">成功率</span>
-                    <span class="metric-value" id="success-rate">
-                        {% if state.total_checks > 0 %}
-                            {{ "%.1f"|format(state.successful_checks / state.total_checks * 100) }}%
-                        {% else %}
-                            0%
-                        {% endif %}
-                    </span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="success-progress" style="width: 
-                        {% if state.total_checks > 0 %}
-                            {{ (state.successful_checks / state.total_checks * 100)|round(1) }}%
-                        {% else %}
-                            0%
-                        {% endif %}
-                    "></div>
-                </div>
-            </div>
-
-            <!-- 回應時間 -->
-            <div class="status-card">
-                <h3>
-                    <span class="status-indicator status-warning"></span>
-                    回應時間
-                </h3>
-                <div class="metric">
-                    <span class="metric-label">平均回應</span>
-                    <span class="metric-value" id="avg-response-time">
-                        {% if state.avg_response_time > 0 %}
-                            {{ state.avg_response_time }}ms
-                        {% else %}
-                            --
-                        {% endif %}
-                    </span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">成功次數</span>
-                    <span class="metric-value" id="successful-checks">{{ state.successful_checks }}</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">失敗次數</span>
-                    <span class="metric-value" id="failed-checks">{{ state.failed_checks }}</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 健康度指標 -->
-        <div class="health-grid">
-            <div class="health-card health-success">
-                <div class="health-value success-value" id="health-score">
-                    {% if state.total_checks > 0 %}
-                        {{ "%.0f"|format(state.successful_checks / state.total_checks * 100) }}
-                    {% else %}
-                        100
-                    {% endif %}
-                </div>
-                <div class="health-label">健康度分數</div>
-            </div>
-            <div class="health-card health-info">
-                <div class="health-value info-value" id="uptime-hours">
-                    {{ state.uptime.split(':')[0] if ':' in state.uptime else '0' }}
-                </div>
-                <div class="health-label">運行小時</div>
-            </div>
-            <div class="health-card health-warning">
-                <div class="health-value warning-value" id="check-frequency">
-                    {{ state.check_interval // 60 }}
-                </div>
-                <div class="health-label">檢查間隔(分鐘)</div>
-            </div>
-            <div class="health-card health-error">
-                <div class="health-value error-value" id="error-rate">
-                    {% if state.total_checks > 0 %}
-                        {{ "%.1f"|format(state.failed_checks / state.total_checks * 100) }}
-      {% else %}
-                        0.0
-      {% endif %}
-    </div>
-                <div class="health-label">錯誤率(%)</div>
-            </div>
-        </div>
-
-        <!-- 系統資源監控 -->
-        <div class="health-grid">
-            <div class="health-card health-info">
-                <div class="health-value info-value" id="ram-percent">
-                    {{ "%.1f"|format(state.ram_percent) if state.ram_percent > 0 else "0.0" }}
-                </div>
-                <div class="health-label">RAM使用率(%)</div>
-            </div>
-            <div class="health-card health-warning">
-                <div class="health-value warning-value" id="ram-usage">
-                    {{ "%.0f"|format(state.ram_usage) if state.ram_usage > 0 else "0" }}
-                </div>
-                <div class="health-label">RAM使用量(MB)</div>
-            </div>
-            <div class="health-card health-success">
-                <div class="health-value success-value" id="ram-total">
-                    {{ "%.0f"|format(state.ram_total) if state.ram_total > 0 else "0" }}
-                </div>
-                <div class="health-label">總RAM(MB)</div>
-            </div>
-            <div class="health-card health-error">
-                <div class="health-value error-value" id="cpu-percent">
-                    {{ "%.1f"|format(state.cpu_percent) if state.cpu_percent > 0 else "0.0" }}
-                </div>
-                <div class="health-label">CPU使用率(%)</div>
-            </div>
-        </div>
-
-        <!-- 最新資料預覽 -->
+        <!-- 電腦狀態 -->
         <div class="status-card">
-            <h3>📄 最新資料摘要</h3>
-            <div class="data-preview" id="latest-data">{{ state.latest_data }}</div>
-  </div>
-
-        <!-- 即時日誌 -->
-        <div class="logs-container">
-            <h3 style="color: #00d4ff; margin-bottom: 10px; font-size: 1em;">📋 即時日誌</h3>
-            <div id="logs">
-                {% for log in state.logs[-10:] %}
-                    <div class="log-entry {% if '✅' in log %}log-success{% elif '🚨' in log %}log-error{% else %}log-warning{% endif %}">
-                        {{ log }}
-                    </div>
-                {% endfor %}
+            <h3>
+                <span class="status-indicator status-success"></span>
+                💻 電腦狀態
+            </h3>
+            <div class="metric">
+                <span class="metric-label">RAM 使用率</span>
+                <span class="metric-value" id="ram-percent">{{ "%.1f"|format(state.ram_percent) if state.ram_percent > 0 else "0.0" }}%</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">RAM 使用量</span>
+                <span class="metric-value" id="ram-usage">{{ "%.0f"|format(state.ram_usage) if state.ram_usage > 0 else "0" }} MB</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">RAM 總量</span>
+                <span class="metric-value" id="ram-total">{{ "%.0f"|format(state.ram_total) if state.ram_total > 0 else "0" }} MB</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">CPU 使用率</span>
+                <span class="metric-value" id="cpu-percent">{{ "%.1f"|format(state.cpu_percent) if state.cpu_percent > 0 else "0.0" }}%</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">程式運行時間</span>
+                <span class="metric-value" id="uptime">{{ state.uptime }}</span>
             </div>
         </div>
-  </div>
+
+        <!-- API狀態 -->
+        <div class="status-card">
+            <h3>
+                <span class="status-indicator" id="api-status-indicator"></span>
+                🌐 API 狀態
+            </h3>
+            <div class="api-status" id="api-status-display">
+                {{ state.status }}
+            </div>
+            <div class="metric">
+                <span class="metric-label">最後檢查時間</span>
+                <span class="metric-value" id="last-check-time">{{ state.last_check_time.split(' ')[1] if ' ' in state.last_check_time else state.last_check_time }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">下次檢查時間</span>
+                <span class="metric-value" id="next-check-time">{{ state.next_check_time.split(' ')[1] if ' ' in state.next_check_time else state.next_check_time }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">檢查間隔</span>
+                <span class="metric-value">{{ state.check_interval // 60 }} 分鐘</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">總檢查次數</span>
+                <span class="metric-value" id="total-checks">{{ state.total_checks }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">成功次數</span>
+                <span class="metric-value" id="successful-checks">{{ state.successful_checks }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">失敗次數</span>
+                <span class="metric-value" id="failed-checks">{{ state.failed_checks }}</span>
+            </div>
+        </div>
+    </div>
 
     <script>
-        let lastUpdateTime = new Date();
-
         // 更新即時時間
         function updateTime() {
             const now = new Date();
@@ -463,27 +239,40 @@
             document.getElementById('current-time').textContent = timeString;
         }
 
-        // 更新狀態指示器
-        function updateStatusIndicators(status) {
-            const systemIndicator = document.getElementById('system-status-indicator');
-            const fetchIndicator = document.getElementById('fetch-status-indicator');
+        // 更新API狀態顯示
+        function updateApiStatus(status) {
+            const statusDisplay = document.getElementById('api-status-display');
+            const statusIndicator = document.getElementById('api-status-indicator');
+            
+            statusDisplay.textContent = status;
+            statusDisplay.className = 'api-status';
+            statusIndicator.className = 'status-indicator';
             
             if (status === '✅ 成功') {
-                systemIndicator.className = 'status-indicator status-success';
-                fetchIndicator.className = 'status-indicator status-success';
+                statusDisplay.classList.add('api-success');
+                statusIndicator.classList.add('status-success');
+            } else if (status === '🚨 異常') {
+                statusDisplay.classList.add('api-error');
+                statusIndicator.classList.add('status-error');
             } else {
-                systemIndicator.className = 'status-indicator status-error';
-                fetchIndicator.className = 'status-indicator status-error';
+                statusDisplay.classList.add('api-waiting');
+                statusIndicator.classList.add('status-warning');
             }
         }
 
         // 更新頁面資料
         function updatePageData(data) {
-            document.getElementById('program-status').textContent = data.program_status;
+            // 更新電腦狀態
+            document.getElementById('ram-percent').textContent = (data.ram_percent || 0).toFixed(1) + '%';
+            document.getElementById('ram-usage').textContent = Math.round(data.ram_usage || 0) + ' MB';
+            document.getElementById('ram-total').textContent = Math.round(data.ram_total || 0) + ' MB';
+            document.getElementById('cpu-percent').textContent = (data.cpu_percent || 0).toFixed(1) + '%';
             document.getElementById('uptime').textContent = data.uptime;
-            document.getElementById('api-status').textContent = data.status;
             
-            // 只顯示時間部分
+            // 更新API狀態
+            updateApiStatus(data.status);
+            
+            // 更新時間
             const lastCheckTime = data.last_check_time.split(' ')[1] || data.last_check_time;
             const nextCheckTime = data.next_check_time.split(' ')[1] || data.next_check_time;
             document.getElementById('last-check-time').textContent = lastCheckTime;
@@ -492,67 +281,11 @@
             document.getElementById('total-checks').textContent = data.total_checks;
             document.getElementById('successful-checks').textContent = data.successful_checks;
             document.getElementById('failed-checks').textContent = data.failed_checks;
-            document.getElementById('latest-data').textContent = data.latest_data;
-            
-            // 更新成功率
-            const successRate = data.total_checks > 0 ? (data.successful_checks / data.total_checks * 100).toFixed(1) : 0;
-            document.getElementById('success-rate').textContent = successRate + '%';
-            document.getElementById('success-progress').style.width = successRate + '%';
-            
-            // 更新平均回應時間
-            if (data.avg_response_time > 0) {
-                document.getElementById('avg-response-time').textContent = data.avg_response_time + 'ms';
-            } else {
-                document.getElementById('avg-response-time').textContent = '--';
-            }
-            
-            // 更新健康度指標
-            const healthScore = data.total_checks > 0 ? Math.round(data.successful_checks / data.total_checks * 100) : 100;
-            document.getElementById('health-score').textContent = healthScore;
-            
-            const uptimeHours = data.uptime.split(':')[0] || '0';
-            document.getElementById('uptime-hours').textContent = uptimeHours;
-            
-            const errorRate = data.total_checks > 0 ? (data.failed_checks / data.total_checks * 100).toFixed(1) : 0.0;
-            document.getElementById('error-rate').textContent = errorRate;
-            
-            // 更新系統資源監控
-            document.getElementById('ram-percent').textContent = data.ram_percent ? data.ram_percent.toFixed(1) : '0.0';
-            document.getElementById('ram-usage').textContent = data.ram_usage ? Math.round(data.ram_usage) : '0';
-            document.getElementById('ram-total').textContent = data.ram_total ? Math.round(data.ram_total) : '0';
-            document.getElementById('cpu-percent').textContent = data.cpu_percent ? data.cpu_percent.toFixed(1) : '0.0';
-            
-            // 更新狀態指示器
-            updateStatusIndicators(data.status);
-            
-            // 更新日誌
-            const logsContainer = document.getElementById('logs');
-            logsContainer.innerHTML = '';
-            data.logs.slice(-10).forEach(log => {
-                const logEntry = document.createElement('div');
-                logEntry.className = 'log-entry';
-                if (log.includes('✅')) logEntry.classList.add('log-success');
-                else if (log.includes('🚨')) logEntry.classList.add('log-error');
-                else logEntry.classList.add('log-warning');
-                logEntry.textContent = log;
-                logsContainer.appendChild(logEntry);
-            });
-        }
-
-        // 添加鍵盤快捷鍵
-        function setupKeyboardShortcuts() {
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
-                    e.preventDefault();
-                    location.reload();
-                }
-            });
         }
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             updateTime();
-            setupKeyboardShortcuts();
             
             // 每秒更新時間
             setInterval(updateTime, 1000);
@@ -564,11 +297,10 @@
                     .then(data => updatePageData(data))
                     .catch(error => {
                         console.error('Error fetching status:', error);
-                        document.getElementById('api-status').textContent = '🚨 連線錯誤';
-                        updateStatusIndicators('🚨 異常');
+                        updateApiStatus('🚨 連線錯誤');
                     });
             }, 5000);
         });
-  </script>
+    </script>
 </body>
 </html>
