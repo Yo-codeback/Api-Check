@@ -5,6 +5,7 @@ import requests
 import psutil
 import json
 import os
+import traceback
 from datetime import datetime, timedelta
 from config import *
 
@@ -38,11 +39,15 @@ state = {
 def update_uptime():
     """更新程式運行時間"""
     while True:
-        uptime_delta = datetime.now() - state["start_time"]
-        hours, remainder = divmod(int(uptime_delta.total_seconds()), 3600)
-        minutes, seconds = divmod(remainder, 60)
-        state["uptime"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-        time.sleep(1)
+        try:
+            uptime_delta = datetime.now() - state["start_time"]
+            hours, remainder = divmod(int(uptime_delta.total_seconds()), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            state["uptime"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            time.sleep(1)
+        except Exception as e:
+            print(f"Uptime update error: {e}")
+            time.sleep(1)
 
 def update_system_resources():
     """更新系統資源使用情況"""
@@ -107,9 +112,63 @@ threading.Thread(target=fetch_data, daemon=True).start()
 threading.Thread(target=update_uptime, daemon=True).start()
 threading.Thread(target=update_system_resources, daemon=True).start()
 
+@app.route("/debug")
+def debug():
+    try:
+        return jsonify({
+            "state_keys": list(state.keys()),
+            "state_values": {k: str(v)[:100] for k, v in state.items()},
+            "config": {
+                "API_URL": API_URL,
+                "CHECK_INTERVAL": CHECK_INTERVAL,
+                "SYSTEM_VERSION": SYSTEM_VERSION
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()})
+
 @app.route("/")
 def index():
-    return render_template("dashboard.html", state=state)
+    try:
+        # 確保所有必要的屬性都存在
+        required_keys = [
+            'last_check_time', 'next_check_time', 'status', 'latest_data', 
+            'logs', 'program_status', 'check_interval', 'total_checks', 
+            'successful_checks', 'failed_checks', 'uptime', 'start_time', 
+            'last_success_time', 'last_failure_time', 'response_times', 
+            'avg_response_time', 'system_version', 'ram_usage', 'ram_total', 
+            'ram_percent', 'cpu_percent'
+        ]
+        
+        for key in required_keys:
+            if key not in state:
+                print(f"Missing key in state: {key}")
+                state[key] = "N/A" if key not in ['logs', 'response_times'] else []
+        
+        print(f"State keys: {list(state.keys())}")
+        return render_template("dashboard.html", state=state)
+    except Exception as e:
+        print(f"Template error: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
+        return f"Error: {str(e)}", 500
+
+@app.route("/test")
+def test():
+    try:
+        return render_template("test.html", state=state)
+    except Exception as e:
+        print(f"Test template error: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
+        return f"Test Error: {str(e)}", 500
+
+@app.route("/simple")
+def simple():
+    try:
+        return render_template("simple.html", state=state)
+    except Exception as e:
+        print(f"Simple template error: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
+        return f"Simple Error: {str(e)}", 500
 
 @app.route("/api/status")
 def api_status():
@@ -118,17 +177,19 @@ def api_status():
 @app.route("/api/update", methods=["POST"])
 def api_update():
     data = request.json
-    state.update(data)
-    return jsonify({"status": "updated"})
+    if data and "action" in data:
+        if data["action"] == "reset":
+            state["total_checks"] = 0
+            state["successful_checks"] = 0
+            state["failed_checks"] = 0
+            state["response_times"] = []
+            state["avg_response_time"] = 0
+            return jsonify({"status": "success", "message": "統計資料已重置"})
+    return jsonify({"status": "error", "message": "無效的操作"})
 
 @app.route("/health")
 def health_check():
-    """健康檢查端點，用於Render的存活檢查"""
-    return jsonify({
-        "status": "healthy",
-        "uptime": state["uptime"],
-        "timestamp": datetime.now().isoformat()
-    })
+    return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
 
 if __name__ == "__main__":
     # 從環境變數獲取端口，預設為5000

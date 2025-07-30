@@ -438,13 +438,10 @@
             <h3 style="color: #00d4ff; margin-bottom: 10px; font-size: 1em;">📋 即時日誌</h3>
             <div id="logs">
                 {% for log in state.logs[-10:] %}
-                    <div class="log-entry 
-                        {% if '✅' in log %}log-success
-                        {% elif '🚨' in log %}log-error
-                        {% else %}log-warning{% endif %}">
-      {{ log }}
+                    <div class="log-entry {% if '✅' in log %}log-success{% elif '🚨' in log %}log-error{% else %}log-warning{% endif %}">
+                        {{ log }}
                     </div>
-    {% endfor %}
+                {% endfor %}
             </div>
         </div>
   </div>

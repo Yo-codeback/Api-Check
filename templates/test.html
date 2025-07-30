@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>測試頁面</title>
+</head>
+<body>
+    <h1>API 監控測試</h1>
+    <p>狀態: {{ state.status }}</p>
+    <p>程式狀態: {{ state.program_status }}</p>
+    <p>檢查間隔: {{ state.check_interval }}秒</p>
+    <p>總檢查次數: {{ state.total_checks }}</p>
+    <p>成功次數: {{ state.successful_checks }}</p>
+    <p>失敗次數: {{ state.failed_checks }}</p>
+    <p>運行時間: {{ state.uptime }}</p>
+    <p>RAM使用率: {{ state.ram_percent }}%</p>
+    <p>CPU使用率: {{ state.cpu_percent }}%</p>
+    <p>最後檢查時間: {{ state.last_check_time }}</p>
+    <p>下次檢查時間: {{ state.next_check_time }}</p>
+    <p>系統版本: {{ state.system_version }}</p>
+    
+    <h2>最新資料:</h2>
+    <pre>{{ state.latest_data }}</pre>
+    
+    <h2>最近日誌:</h2>
+    <ul>
+    {% for log in state.logs[-5:] %}
+        <li>{{ log }}</li>
+    {% endfor %}
+    </ul>
+</body>
+</html> 
