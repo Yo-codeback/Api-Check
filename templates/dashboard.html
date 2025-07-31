@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>API 監控中心</title>
     <style>
         * {
@@ -15,70 +15,88 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
             color: #ffffff;
-            overflow: hidden;
+            overflow-x: hidden;
             height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        /* 全螢幕模式 */
+        body.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .header {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 12px 16px;
             border-bottom: 2px solid #00d4ff;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: relative;
+            z-index: 100;
         }
 
         .header h1 {
             color: #00d4ff;
-            font-size: 2em;
+            font-size: 1.4em;
             text-shadow: 0 0 20px #00d4ff;
             font-weight: 300;
         }
 
         .time-display {
-            font-size: 1.5em;
+            font-size: 1.1em;
             color: #00d4ff;
             text-shadow: 0 0 10px #00d4ff;
             font-family: 'Courier New', monospace;
         }
 
         .main-container {
-            height: calc(100vh - 80px);
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
+            height: calc(100vh - 60px);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .status-card {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 15px;
-            padding: 25px;
+            border-radius: 12px;
+            padding: 16px;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
 
         .status-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.2);
         }
 
         .status-card h3 {
             color: #00d4ff;
-            margin-bottom: 20px;
-            font-size: 1.3em;
+            margin-bottom: 12px;
+            font-size: 1.1em;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .status-indicator {
             display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -102,20 +120,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 10px;
+            margin-bottom: 10px;
+            padding: 8px;
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
+            border-radius: 6px;
         }
 
         .metric-label {
             color: #cccccc;
-            font-size: 1em;
+            font-size: 0.9em;
         }
 
         .metric-value {
             color: #ffffff;
-            font-size: 1.1em;
+            font-size: 0.95em;
             font-weight: 500;
         }
 
@@ -126,12 +144,12 @@
         }
 
         .api-status {
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: bold;
             text-align: center;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
         }
 
         .api-success {
@@ -146,6 +164,7 @@
             color: #ff4444;
             border: 2px solid #ff4444;
             box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+            animation: errorPulse 1s infinite;
         }
 
         .api-waiting {
@@ -155,29 +174,35 @@
             box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
         }
 
+        @keyframes errorPulse {
+            0% { box-shadow: 0 0 20px rgba(255, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 68, 68, 0.6); }
+            100% { box-shadow: 0 0 20px rgba(255, 68, 68, 0.3); }
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
         }
 
         .stat-item {
             background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
             border: 1px solid rgba(0, 212, 255, 0.2);
         }
 
         .stat-value {
-            font-size: 1.8em;
+            font-size: 1.4em;
             font-weight: bold;
             color: #00d4ff;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .stat-label {
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #cccccc;
         }
 
@@ -204,9 +229,147 @@
         .info-stat .stat-value {
             color: #00d4ff;
         }
+
+        /* 警報覆蓋層 */
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: alertBlink 0.5s infinite;
+        }
+
+        @keyframes alertBlink {
+            0% { background: rgba(255, 0, 0, 0.9); }
+            50% { background: rgba(255, 0, 0, 0.7); }
+            100% { background: rgba(255, 0, 0, 0.9); }
+        }
+
+        .alert-content {
+            text-align: center;
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .alert-content h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .alert-content p {
+            font-size: 0.8em;
+            margin-bottom: 20px;
+        }
+
+        .alert-button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 0 8px;
+        }
+
+        .alert-button:hover {
+            background: #cc3333;
+        }
+
+        /* 連線狀態指示器 */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+            z-index: 200;
+        }
+
+        .connection-status.disconnected {
+            background: #ff4444;
+            box-shadow: 0 0 10px #ff4444;
+            animation: connectionPulse 1s infinite;
+        }
+
+        @keyframes connectionPulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.2em;
+            }
+            
+            .time-display {
+                font-size: 1em;
+            }
+            
+            .main-container {
+                padding: 8px;
+                gap: 8px;
+            }
+            
+            .status-card {
+                padding: 12px;
+            }
+            
+            .api-status {
+                font-size: 1.1em;
+                padding: 12px;
+            }
+            
+            .stat-value {
+                font-size: 1.2em;
+            }
+        }
+
+        /* 觸控優化 */
+        .metric, .stat-item {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 防止文字選擇 */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
+    <!-- 連線狀態指示器 -->
+    <div class="connection-status" id="connection-status"></div>
+
+    <!-- 警報覆蓋層 -->
+    <div class="alert-overlay" id="alert-overlay">
+        <div class="alert-content">
+            <h2>🚨 系統警報</h2>
+            <p id="alert-message">連線錯誤</p>
+            <div>
+                <button class="alert-button" onclick="dismissAlert()">確認</button>
+                <button class="alert-button" onclick="retryConnection()">重試</button>
+            </div>
+        </div>
+    </div>
+
     <div class="header">
         <h1>🚀 API 監控中心</h1>
         <div class="time-display" id="current-time">載入中...</div>
@@ -306,6 +469,47 @@
     </div>
 
     <script>
+        let alertInterval;
+        let dataFetchInterval;
+        let isAlertActive = false;
+        let consecutiveFailures = 0;
+        let audioContext;
+        let oscillator;
+
+        // 初始化音頻上下文
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('音頻上下文初始化失敗:', e);
+            }
+        }
+
+        // 播放警報音
+        function playAlarm() {
+            if (!audioContext) return;
+            
+            try {
+                oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log('警報音播放失敗:', e);
+            }
+        }
+
         // 更新即時時間
         function updateTime() {
             const now = new Date();
@@ -332,12 +536,70 @@
             if (status === '✅ 成功') {
                 statusDisplay.classList.add('api-success');
                 statusIndicator.classList.add('status-success');
+                consecutiveFailures = 0;
+                stopAlert();
             } else if (status === '🚨 異常') {
                 statusDisplay.classList.add('api-error');
                 statusIndicator.classList.add('status-error');
+                consecutiveFailures++;
+                if (consecutiveFailures >= 2) {
+                    startAlert('API 連線異常');
+                }
             } else {
                 statusDisplay.classList.add('api-waiting');
                 statusIndicator.classList.add('status-warning');
+            }
+        }
+
+        // 開始警報
+        function startAlert(message) {
+            if (isAlertActive) return;
+            
+            isAlertActive = true;
+            document.getElementById('alert-message').textContent = message;
+            document.getElementById('alert-overlay').style.display = 'flex';
+            
+            // 每10秒響一次警報
+            alertInterval = setInterval(() => {
+                playAlarm();
+            }, 10000);
+            
+            // 立即播放一次警報
+            playAlarm();
+        }
+
+        // 停止警報
+        function stopAlert() {
+            if (!isAlertActive) return;
+            
+            isAlertActive = false;
+            document.getElementById('alert-overlay').style.display = 'none';
+            
+            if (alertInterval) {
+                clearInterval(alertInterval);
+                alertInterval = null;
+            }
+        }
+
+        // 關閉警報
+        function dismissAlert() {
+            stopAlert();
+        }
+
+        // 重試連線
+        function retryConnection() {
+            stopAlert();
+            consecutiveFailures = 0;
+            fetchStatus();
+        }
+
+        // 更新連線狀態指示器
+        function updateConnectionStatus(isConnected) {
+            const statusIndicator = document.getElementById('connection-status');
+            if (isConnected) {
+                statusIndicator.classList.remove('disconnected');
+            } else {
+                statusIndicator.classList.add('disconnected');
             }
         }
 
@@ -369,25 +631,70 @@
             const lastFailureTime = data.last_failure_time ? (data.last_failure_time.split(' ')[1] || data.last_failure_time) : '無失敗記錄';
             document.getElementById('last-success-time').textContent = lastSuccessTime;
             document.getElementById('last-failure-time').textContent = lastFailureTime;
+            
+            // 更新連線狀態
+            updateConnectionStatus(true);
+        }
+
+        // 獲取狀態資料
+        function fetchStatus() {
+            fetch('/api/status')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updatePageData(data);
+                    updateConnectionStatus(true);
+                })
+                .catch(error => {
+                    console.error('Error fetching status:', error);
+                    updateApiStatus('🚨 連線錯誤');
+                    updateConnectionStatus(false);
+                    
+                    // 如果連續失敗，顯示伺服器關閉警報
+                    consecutiveFailures++;
+                    if (consecutiveFailures >= 2) {
+                        startAlert('連線錯誤 伺服器關閉');
+                    }
+                });
         }
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化音頻
+            initAudio();
+            
+            // 請求全螢幕權限
+            document.addEventListener('click', function() {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                }
+            }, { once: true });
+            
             updateTime();
             
             // 每秒更新時間
             setInterval(updateTime, 1000);
             
-            // 每5秒更新狀態
-            setInterval(() => {
-                fetch('/api/status')
-                    .then(response => response.json())
-                    .then(data => updatePageData(data))
-                    .catch(error => {
-                        console.error('Error fetching status:', error);
-                        updateApiStatus('🚨 連線錯誤');
-                    });
-            }, 5000);
+            // 每30秒更新狀態（警報狀態下）
+            dataFetchInterval = setInterval(fetchStatus, 30000);
+            
+            // 立即執行一次
+            fetchStatus();
+        });
+
+        // 頁面可見性變化時重新開始音頻上下文
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
         });
     </script>
 </body>
