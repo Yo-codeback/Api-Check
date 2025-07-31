@@ -174,22 +174,6 @@ def simple():
 def api_status():
     return jsonify(state)
 
-@app.route("/api/health")
-def api_health():
-    """簡化的健康檢查端點，用於前端連線測試"""
-    try:
-        return jsonify({
-            "status": "healthy",
-            "timestamp": datetime.now().isoformat(),
-            "server_status": "running"
-        })
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        }), 500
-
 @app.route("/api/update", methods=["POST"])
 def api_update():
     data = request.json
